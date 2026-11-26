@@ -1,0 +1,486 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Batch Cooking Semanal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: app móvil de una columna, selector de semana arriba, barra de pestañas inferior fija, tarjetas por día y listas marcables */
+:root {
+  --bg: #f1f5f3;
+  --surface: #ffffff;
+  --fg: #16231e;
+  --muted: #5b6b64;
+  --line: #d9e2de;
+  --accent: #1d6b57;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcefe8;
+  --cold: #245fa8;
+  --cold-soft: #dde9f7;
+  --warn: #b4540a;
+  --warn-soft: #fbe7d3;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1a16; --surface: #17251f; --fg: #e6efeb; --muted: #9bb0a7; --line: #2a3d35;
+    --accent: #52c1a0; --accent-ink: #08201a; --accent-soft: #1d3a31;
+    --cold: #7db4ee; --cold-soft: #1c3048; --warn: #f0a15e; --warn-soft: #3d2a17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1a16; --surface: #17251f; --fg: #e6efeb; --muted: #9bb0a7; --line: #2a3d35;
+  --accent: #52c1a0; --accent-ink: #08201a; --accent-soft: #1d3a31;
+  --cold: #7db4ee; --cold-soft: #1c3048; --warn: #f0a15e; --warn-soft: #3d2a17;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-block: 0 88px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+header { padding-block: 20px 12px; }
+h1 { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.1; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; font-size: .95rem; }
+.weekbar { margin-top: 14px; }
+h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0 0 10px; }
+h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
+section[hidden] { display: none !important; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.card.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.day-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.day-head strong { font-family: var(--font-display); font-size: 1.15rem; }
+.pill { font-size: .75rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.pill.cold { background: var(--cold-soft); color: var(--cold); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.meals { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.meals ul { margin: 0; padding-left: 18px; }
+.meals li { margin-bottom: 2px; overflow-wrap: anywhere; color: var(--muted); font-size: .92rem; }
+.sum { font-weight: 600; line-height: 1.3; margin: 0 0 6px; overflow-wrap: anywhere; }
+.banner { background: var(--warn-soft); color: var(--warn); border-radius: 12px; padding: 10px 14px; font-weight: 500; margin-bottom: 12px; }
+.note { color: var(--muted); font-size: .9rem; margin: 6px 0 0; }
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); cursor: pointer; }
+.check:first-of-type { border-top: 0; }
+.check input { width: 22px; height: 22px; margin-top: 1px; accent-color: var(--accent); flex: none; }
+.check > span { min-width: 0; overflow-wrap: anywhere; }
+.check input:checked + span .txt { color: var(--muted); text-decoration: line-through; }
+.tip { display: block; margin-top: 4px; font-size: .88rem; color: var(--muted); }
+.qty { font-weight: 600; }
+.progress { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; margin: 10px 0 14px; }
+.progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .25s; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: .9rem; }
+button { font: inherit; cursor: pointer; }
+.ghost { background: transparent; border: 1px solid var(--line); color: var(--fg); border-radius: 10px; padding: 6px 12px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.seg button { background: transparent; border: 0; color: var(--fg); border-radius: 9px; padding: 10px 8px; font-weight: 600; font-size: .9rem; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.phase-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.phase-head span { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.timer { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: var(--accent-soft); color: var(--accent); border: 0; border-radius: 10px; padding: 6px 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.timer.run { background: var(--accent); color: var(--accent-ink); }
+.timer.done { background: var(--warn); color: #fff; }
+.rows { display: flex; flex-direction: column; }
+.row { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row span:first-child { min-width: 0; overflow-wrap: anywhere; }
+nav {
+  position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+}
+nav button { background: none; border: 0; color: var(--muted); padding: 8px 4px; border-radius: 10px; font-size: .78rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+nav button[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+#toast { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); background: var(--warn); color: #fff; padding: 12px 16px; border-radius: 12px; font-weight: 600; text-align: center; z-index: 5; }
+@media (max-width: 380px) { .meals { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .progress i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Batch Cooking Semanal</h1>
+    <p class="sub">Cocinas el domingo (2 h 30 min con horno, unas 3 h con airfryer) y cubres las 10 ingestas de lunes a viernes. Plan para 1 persona.</p>
+    <div class="weekbar">
+      <div class="seg" role="group" aria-label="Opción de semana">
+        <button data-week="A" aria-pressed="true">Opción A</button>
+        <button data-week="B" aria-pressed="false">Opción B</button>
+      </div>
+      <p class="note" id="weekDesc"></p>
+    </div>
+  </header>
+
+  <section id="menu" class="stack"></section>
+  <section id="compra" class="stack" hidden></section>
+  <section id="domingo" class="stack" hidden></section>
+  <section id="conservar" class="stack" hidden></section>
+</div>
+
+<div id="toast" role="status" hidden></div>
+
+<nav role="tablist" aria-label="Secciones">
+  <button role="tab" data-tab="menu" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Menú</button>
+  <button role="tab" data-tab="compra" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>Compra</button>
+  <button role="tab" data-tab="domingo" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Domingo</button>
+  <button role="tab" data-tab="conservar" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5L4.9 17.5M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>Conservar</button>
+</nav>
+
+<script>
+/* ---------- Pasos compartidos entre las dos opciones ---------- */
+/* Cada paso: x = texto, n = nota, tm = [minutos, etiqueta], m = "o" (solo horno) o "a" (solo airfryer) */
+const S = {
+  ovenOn: { m: "o", x: "Enciende el horno a 200 °C con calor arriba y abajo y deja que precaliente mientras preparas el resto.", n: "Coloca una rejilla en la posición media y otra en la alta." },
+  airOff: { m: "a", x: "No enciendas aún la airfryer. Se precalienta 3 min justo antes de cada tanda.", n: "Saca el cesto, lávalo y sécalo: tiene que estar limpio y sin restos de agua." },
+  vegCut: { x: "Lava y seca las verduras del horno o la airfryer (calabacines, pimientos, cebollas y zanahorias) y córtalas en trozos de unos 3 cm.", n: "Corta las zanahorias en bastones de 1 cm, más finos que el resto, porque tardan más en hacerse." },
+  ovenVeg: { m: "o", x: "Bandeja 1, verduras: pon las verduras en la bandeja con 1 cucharada sopera de aceite, sal y orégano y mézclalas con las manos. Extiéndelas en una sola capa, sin apilar. A los 15 min, remueve.", n: "Están listas cuando los bordes se doran y un tenedor entra en la zanahoria sin esfuerzo.", tm: [30, "Verduras"] },
+  ovenTub: { m: "o", x: "Bandeja 2, patatas y boniato: lávalos, pínchalos varias veces con un tenedor y envuelve cada pieza entera en papel de aluminio.", n: "Están listos cuando un cuchillo fino entra hasta el centro sin resistencia.", tm: [50, "Patatas y boniato"] },
+  airIntro: { m: "a", x: "Cómo funciona la airfryer: el cesto admite una tanda cada vez, en una sola capa y sin amontonar. Si lo llenas, no se dora. Antes de cada tanda, precalienta 3 min a la temperatura indicada (o usa la función Preheat).", n: "Los tiempos son orientativos. Comprueba el punto antes de sacar y añade 2-3 min si hace falta." },
+  airTub: { m: "a", x: "Tanda 1, patatas y boniato (la más larga, empieza por ella): lávalos, sécalos y pínchalos. Córtalos por la mitad a lo largo, úntalos con unas gotas de aceite y sal y colócalos con el corte hacia arriba. 200 °C, dales la vuelta a los 15 min.", n: "Listos cuando un cuchillo entra sin resistencia. Enteros tardan 35-45 min. Mientras cocinan, empieza con los fuegos de la fase 3.", tm: [30, "Patatas y boniato"] },
+  airVeg1: { m: "a", x: "Tanda 2, zanahorias y cebolla: mézclalas con ½ cucharada sopera de aceite, sal y orégano. 180 °C. Agita el cesto a los 7-8 min.", n: "Deben quedar tiernas con los bordes dorados.", tm: [15, "Zanahorias y cebolla"] },
+  airVeg2: { m: "a", x: "Tanda 3, calabacín y pimiento: con ½ cucharada sopera de aceite, sal y orégano. 180 °C. Agita a los 6 min. Junta las dos tandas de verdura en una bandeja y déjalas enfriar.", n: "Si el calabacín suelta agua, ábrelo y deja 1 min más con el cesto vacío de líquido.", tm: [12, "Calabacín y pimiento"] },
+  airClean: { m: "a", x: "Entre tanda y tanda, retira las migas del cesto y vacía la grasa del fondo para que no humee.", n: "En total son unos 1 h 40 min de airfryer. Los fuegos se hacen a la vez." },
+  eggs: { x: "Huevos: hoy no se cocinan. Déjalos crudos en la nevera y hazlos revueltos o en tortilla francesa el mismo día que los comas, en 2-3 min (receta en la pestaña Menú)." },
+  pasta: { x: "Pasta: hierve abundante agua con sal. Cuece 8 cucharadas soperas el tiempo del paquete menos 1 min, porque luego se recalienta. Escúrrela, pásala bajo el grifo frío y remueve para que no se pegue.", tm: [10, "Pasta"] },
+  cool: { x: "Pasa lo cocinado a bandejas o platos anchos y déjalo enfriar sin tapar unos 20 min a temperatura ambiente. Guarda todo antes de 2 h.", tm: [20, "Enfriar"] },
+  tuppers: { x: "Reparte en 10 tuppers de cristal, uno por ingesta: ½ de verdura, ¼ de hidrato y ¼ de proteína. Escribe en cada tupper el día y el contenido." },
+  eggsFridge: { x: "Los huevos se quedan crudos en la nevera. Se hacen al momento, así que no van en ningún tupper." },
+  freezeNote: "Deja 1-2 cm libres en cada tupper porque el contenido se expande al congelar.",
+  salad: { x: "Ensalada aparte: lava la lechuga, sécala y guárdala con papel de cocina. Ralla la zanahoria y aliña la ensalada el mismo día que la comas." }
+};
+
+/* ---------- Opción A: lentejas y garbanzos ---------- */
+const WEEK_A = {
+  desc: "Legumbres: lentejas el martes y garbanzos el jueves.",
+  days: [
+    { d: "Lunes", fr: false, rc: "Pollo asado con arroz y verduras asadas", rn: "Merluza asada con patata y puré de verduras", c: ["1 taza de arroz", "1 filete grande de pollo", "½ plato de verduras asadas"], n: ["1 lomo grande de merluza", "1 patata mediana", "2 cacillos de puré"] },
+    { d: "Martes", fr: false, rc: "Lentejas estofadas con huevos revueltos o en tortilla francesa y ensalada", rn: "Salmón asado con boniato y verduras asadas", c: ["1,5 cacillos de lentejas estofadas", "2 huevos en revuelto o tortilla francesa", "Ensalada"], n: ["1 lomo mediano de salmón", "1 boniato mediano", "½ plato de verduras asadas"] },
+    { d: "Miércoles", fr: false, rc: "Pasta con atún, huevo revuelto o en tortilla francesa y ensalada de lechuga y zanahoria", rn: "Pollo asado con patata y ensalada", c: ["1 taza de pasta", "1 lata de atún al natural", "1 huevo en revuelto o tortilla francesa", "Ensalada de lechuga y zanahoria"], n: ["1 filete grande de pollo", "1 patata mediana", "Ensalada"] },
+    { d: "Jueves", fr: true, rc: "Garbanzos estofados con ternera y verduras", rn: "Arroz con pollo y verduras", c: ["1,5 cacillos de garbanzos estofados", "1 filete mediano de ternera", "½ plato de verduras asadas"], n: ["1 taza de arroz", "1 filete grande de pollo", "½ plato de verduras asadas"] },
+    { d: "Viernes", fr: true, rc: "Pasta con tomate y hamburguesa de ternera", rn: "Puré de verduras con huevos revueltos o en tortilla francesa", c: ["1 taza de pasta con tomate", "1 hamburguesa casera de ternera"], n: ["2 cacillos de puré", "2 huevos en revuelto o tortilla francesa"] }
+  ],
+  shop: [
+    ["Carnes y pescado", [["3 filetes grandes", "pollo"], ["1 filete mediano", "ternera"], ["1 hamburguesa casera", "ternera picada"], ["1 lomo grande", "merluza"], ["1 lomo mediano", "salmón"], ["1 lata", "atún al natural"]]],
+    ["Huevos", [["6", "huevos (se usan 5; se hacen al momento)"]]],
+    ["Hidratos y legumbres", [["7 cucharadas soperas", "arroz crudo (unas 2 tazas cocidas)"], ["8 cucharadas soperas", "pasta cruda (unas 2 tazas cocidas)"], ["2", "patatas medianas"], ["1", "boniato mediano"], ["1 bote", "lentejas cocidas (se usa ½)"], ["1 bote", "garbanzos cocidos (se usa ½)"]]],
+    ["Verduras para el horno o la airfryer", [["2", "calabacines"], ["2", "pimientos"], ["2", "cebollas grandes"], ["3", "zanahorias"]]],
+    ["Verduras para el puré", [["3", "zanahorias"], ["1", "puerro"], ["1", "calabacín"], ["1", "patata pequeña"]]],
+    ["Verduras para los estofados", [["1", "cebolla"], ["1", "puerro"], ["1", "pimiento"], ["1", "zanahoria"]]],
+    ["Ensalada", [["½", "lechuga"], ["2", "zanahorias"]]],
+    ["Despensa", [["4 cucharadas soperas", "tomate triturado"], ["5 cucharadas soperas", "aceite de oliva virgen extra (más unas gotas para los huevos)"], ["", "sal, pimentón, ajo en polvo y orégano"]]]
+  ],
+  phases: [
+    { t: "1. Preparación", r: "0:00 – 0:25", s: [
+      S.ovenOn, S.airOff, S.vegCut,
+      { x: "Pela y trocea las verduras del puré (3 zanahorias, 1 puerro, 1 calabacín y 1 patata pequeña) y déjalas en un cuenco aparte." },
+      { x: "Pica en cubos de 1 cm la cebolla, el puerro, el pimiento y la zanahoria de los estofados. Divide el montón en dos mitades iguales: una para las lentejas y otra para los garbanzos." },
+      { x: "Pica muy fina ½ cebolla para el tomate de la pasta." },
+      { x: "Escurre las lentejas y los garbanzos de bote y acláralos bajo el grifo hasta que el agua salga clara. Déjalos en dos cuencos." },
+      { x: "Forma la hamburguesa con la carne picada, una pizca de sal y ajo en polvo. Haz un disco de unos 2 cm de grosor y hunde el centro con el pulgar para que no se abombe al cocinar." },
+      { x: "Seca con papel de cocina el pollo, la ternera, la merluza y el salmón.", n: "La carne y el pescado secos se doran mejor y no sueltan agua." }
+    ] },
+    { t: { o: "2. Horno", a: "2. Airfryer Cosori 5,5 L" }, r: { o: "0:25 – 1:15", a: "0:25 – 2:05" }, s: [
+      S.ovenVeg, S.ovenTub,
+      { m: "o", x: "Bandeja 3, pollo: úntalo por los dos lados con 1 cucharada de postre de aceite, sal, pimentón y ajo en polvo. Colócalo en un lado de la bandeja. Dale la vuelta a mitad de tiempo.", n: "Debe quedar blanco por dentro, sin rosa. Si tienes termómetro, 74 °C en el centro.", tm: [25, "Pollo"] },
+      { m: "o", x: "Misma bandeja, en el otro lado: el filete de ternera (sal, pimentón y ajo en polvo) y la hamburguesa. Sácalos a los 15-18 min, antes que el pollo.", n: "La hamburguesa no debe tener rosa por dentro (71 °C en el centro).", tm: [18, "Ternera y hamburguesa"] },
+      { m: "o", x: "Bandeja 4, pescado: baja el horno a 180 °C. Coloca la merluza y el salmón (con la piel hacia abajo) con unas gotas de aceite y sal.", n: "Están hechos cuando la carne se separa en lascas con el tenedor.", tm: [18, "Pescado"] },
+      { m: "o", x: "Si tu horno no admite 4 bandejas a la vez: primero verduras y tubérculos, que son los que más tardan. Cuando salgan las verduras, entran el pollo, la ternera y la hamburguesa. El pescado va en el último turno a 180 °C.", n: "Con este orden la sesión se alarga unos 30-40 min." },
+      S.airIntro, S.airTub, S.airVeg1, S.airVeg2,
+      { m: "a", x: "Tanda 4, pollo: 3 filetes grandes untados con 1 cucharada de postre de aceite, sal, pimentón y ajo en polvo. Colócalos sin que se toquen (si no caben, hazlo en 2 + 1). 180 °C. Dales la vuelta a los 8 min.", n: "Blanco por dentro y 74 °C en el centro. Si los filetes tienen más de 2 cm, añade 3 min.", tm: [15, "Pollo"] },
+      { m: "a", x: "Tanda 5, ternera y hamburguesa: el filete con sal, pimentón y ajo en polvo y la hamburguesa juntos. 180 °C. Dales la vuelta a los 6 min.", n: "La hamburguesa debe estar sin rosa por dentro (71 °C).", tm: [11, "Ternera y hamburguesa"] },
+      { m: "a", x: "Tanda 6, pescado (siempre el último, para que el olor no pase al resto): merluza y salmón con la piel hacia abajo, con unas gotas de aceite y sal. 180 °C, sin darles la vuelta.", n: "Se separan en lascas. Si se pegan, usa papel de airfryer perforado.", tm: [10, "Pescado"] },
+      S.airClean
+    ] },
+    { t: "3. Fuegos mientras tanto", r: { o: "durante el horno", a: "durante la airfryer" }, s: [
+      S.eggs,
+      { x: "Arroz: en un cazo, 7 cucharadas soperas de arroz con 2 vasos de agua y una pizca de sal. Cuando hierva, tapa y baja a fuego medio-bajo sin destapar. Apaga y deja reposar tapado 5 min. Suéltalo con un tenedor.", tm: [18, "Arroz"] },
+      S.pasta,
+      { x: "Puré: cubre las verduras del puré con agua y hiérvelas hasta que la zanahoria se parta con un tenedor. Escurre y guarda 1 vaso del agua. Tritura añadiendo el agua poco a poco hasta una textura espesa y 1 cucharada de postre de aceite. Salen 5-6 cacillos.", tm: [20, "Puré"] },
+      { x: "Lentejas estofadas: en una olla, sofríe la mitad de las verduras de estofado con 1 cucharada de postre de aceite a fuego medio durante 8 min, removiendo, hasta que la cebolla esté transparente. Añade 1 cucharadita de pimentón, remueve 20 segundos y echa ½ bote de lentejas con 1 vaso de agua. Cuece a fuego suave.", n: "Pon el temporizador al empezar la cocción. Deben quedar melosas, no secas. Añade sal al final.", tm: [10, "Lentejas"] },
+      { x: "Garbanzos estofados: repite el proceso con la otra mitad de las verduras y ½ bote de garbanzos.", tm: [10, "Garbanzos"] },
+      { x: "Tomate de la pasta: sofríe la ½ cebolla picada con 1 cucharada de postre de aceite durante 5 min. Añade 4 cucharadas soperas de tomate triturado, sal y orégano y cuece a fuego suave.", n: "Remueve de vez en cuando para que no se pegue.", tm: [10, "Tomate"] }
+    ] },
+    { t: "4. Enfriar y guardar", r: { o: "1:50 – 2:30", a: "2:10 – 2:50" }, s: [
+      S.cool, S.tuppers,
+      { x: "Nevera (lunes a miércoles): arroz con pollo, merluza con patata y puré, lentejas, salmón con boniato y verduras, pasta con atún, y pollo con patata." },
+      S.eggsFridge,
+      { x: "Congelador (jueves y viernes): garbanzos con ternera y verduras, arroz con pollo y verduras, pasta con tomate y hamburguesa, y 2 cacillos de puré.", n: S.freezeNote },
+      { x: "Las mitades de bote de lentejas y garbanzos que sobran, guárdalas en un tupper en la nevera para otra comida (3 días)." },
+      S.salad
+    ] }
+  ]
+};
+
+/* ---------- Opción B: lentejas y judías verdes ---------- */
+const WEEK_B = {
+  desc: "Legumbres: lentejas el martes y judías verdes el miércoles.",
+  days: [
+    { d: "Lunes", fr: false, rc: "Pavo asado con patata y verduras asadas", rn: "Bacalao asado con arroz y ensalada", c: ["1 filete grande de pavo", "1 patata mediana", "½ plato de verduras asadas"], n: ["1 lomo grande de bacalao", "1 taza de arroz", "Ensalada"] },
+    { d: "Martes", fr: false, rc: "Lentejas estofadas con lomo de cerdo y verduras asadas", rn: "Huevos revueltos o en tortilla francesa con boniato y ensalada", c: ["1,5 cacillos de lentejas estofadas", "1 filete mediano de lomo de cerdo", "½ plato de verduras asadas"], n: ["2 huevos en revuelto o tortilla francesa", "1 boniato mediano", "Ensalada"] },
+    { d: "Miércoles", fr: false, rc: "Judías verdes con patata y pollo asado", rn: "Pasta con tomate, atún y ensalada", c: ["2 cacillos de judías verdes con patata", "1 filete grande de pollo"], n: ["1 taza de pasta con tomate", "1 lata de atún al natural", "Ensalada de lechuga y zanahoria"] },
+    { d: "Jueves", fr: true, rc: "Lomo de cerdo con arroz y verduras asadas", rn: "Puré de verduras con huevos revueltos o en tortilla francesa", c: ["1 filete mediano de lomo de cerdo", "1 taza de arroz", "½ plato de verduras asadas"], n: ["2 cacillos de puré", "2 huevos en revuelto o tortilla francesa"] },
+    { d: "Viernes", fr: true, rc: "Pasta con tomate y hamburguesa de pavo", rn: "Pavo asado con arroz y verduras asadas", c: ["1 taza de pasta con tomate", "1 hamburguesa casera de pavo"], n: ["1 filete grande de pavo", "1 taza de arroz", "½ plato de verduras asadas"] }
+  ],
+  shop: [
+    ["Carnes y pescado", [["2 filetes grandes", "pavo"], ["1 hamburguesa casera", "pavo picado"], ["1 filete grande", "pollo"], ["2 filetes medianos", "lomo de cerdo"], ["1 lomo grande", "bacalao"], ["1 lata", "atún al natural"]]],
+    ["Huevos", [["4", "huevos (se hacen al momento)"]]],
+    ["Hidratos y legumbres", [["10 cucharadas soperas", "arroz crudo (unas 3 tazas cocidas)"], ["8 cucharadas soperas", "pasta cruda (unas 2 tazas cocidas)"], ["1", "patata mediana"], ["1", "boniato mediano"], ["1 bote", "lentejas cocidas (se usa ½)"]]],
+    ["Judías verdes con patata", [["250 g", "judías verdes (frescas o congeladas)"], ["1", "patata pequeña"]]],
+    ["Verduras para el horno o la airfryer", [["2", "calabacines"], ["2", "pimientos"], ["2", "cebollas grandes"], ["3", "zanahorias"]]],
+    ["Verduras para el puré", [["2", "zanahorias"], ["1", "puerro"], ["1", "calabacín pequeño"], ["1", "patata pequeña"]]],
+    ["Verduras para las lentejas", [["1", "cebolla pequeña"], ["½", "pimiento"], ["1", "zanahoria"]]],
+    ["Salsa de tomate para la pasta", [["1", "cebolla pequeña"], ["8 cucharadas soperas", "tomate triturado"]]],
+    ["Ensalada", [["½", "lechuga"], ["2", "zanahorias"]]],
+    ["Despensa", [["5 cucharadas soperas", "aceite de oliva virgen extra (más unas gotas para los huevos)"], ["", "sal, pimentón, ajo en polvo y orégano"]]]
+  ],
+  phases: [
+    { t: "1. Preparación", r: "0:00 – 0:25", s: [
+      S.ovenOn, S.airOff, S.vegCut,
+      { x: "Pela y trocea las verduras del puré (2 zanahorias, 1 puerro, 1 calabacín pequeño y 1 patata pequeña) y déjalas en un cuenco aparte." },
+      { x: "Pica en cubos de 1 cm la cebolla pequeña, el ½ pimiento y la zanahoria del sofrito de las lentejas." },
+      { x: "Judías verdes: quita los extremos, lávalas y trocéalas en trozos de 3-4 cm. Pela la patata pequeña y córtala en cubos de 2 cm." },
+      { x: "Pica muy fina la cebolla pequeña para el tomate de la pasta." },
+      { x: "Escurre las lentejas de bote y acláralas bajo el grifo hasta que el agua salga clara." },
+      { x: "Forma la hamburguesa con el pavo picado, una pizca de sal y ajo en polvo. Haz un disco de unos 2 cm de grosor y hunde el centro con el pulgar para que no se abombe al cocinar." },
+      { x: "Seca con papel de cocina el pavo, el pollo, el lomo de cerdo y el bacalao.", n: "La carne y el pescado secos se doran mejor y no sueltan agua." }
+    ] },
+    { t: { o: "2. Horno", a: "2. Airfryer Cosori 5,5 L" }, r: { o: "0:25 – 1:15", a: "0:25 – 2:05" }, s: [
+      S.ovenVeg, S.ovenTub,
+      { m: "o", x: "Bandeja 3, pavo y pollo: úntalos por los dos lados con 1 cucharada de postre de aceite, sal, pimentón y ajo en polvo (2 filetes grandes de pavo y 1 de pollo). Colócalos en un lado de la bandeja y dales la vuelta a mitad de tiempo.", n: "Deben quedar blancos por dentro, sin rosa. Si tienes termómetro, 74 °C en el centro.", tm: [25, "Pavo y pollo"] },
+      { m: "o", x: "Misma bandeja, en el otro lado: los 2 filetes de lomo de cerdo (sal, pimentón y ajo en polvo) y la hamburguesa de pavo. Sácalos a los 15-18 min, antes que el pavo y el pollo.", n: "El lomo de cerdo debe quedar sin partes crudas (63 °C como mínimo). La hamburguesa, sin rosa (74 °C).", tm: [18, "Cerdo y hamburguesa"] },
+      { m: "o", x: "Bandeja 4, pescado: baja el horno a 180 °C. Coloca el lomo de bacalao con unas gotas de aceite y sal.", n: "Está hecho cuando la carne se separa en lascas con el tenedor.", tm: [18, "Bacalao"] },
+      { m: "o", x: "Si tu horno no admite 4 bandejas a la vez: primero verduras y tubérculos, que son los que más tardan. Cuando salgan las verduras, entran el pavo, el pollo, el cerdo y la hamburguesa. El bacalao va en el último turno a 180 °C.", n: "Con este orden la sesión se alarga unos 30-40 min." },
+      S.airIntro, S.airTub, S.airVeg1, S.airVeg2,
+      { m: "a", x: "Tanda 4, pavo y pollo: 2 filetes grandes de pavo y 1 de pollo untados con 1 cucharada de postre de aceite, sal, pimentón y ajo en polvo. Colócalos sin que se toquen (si no caben, hazlo en 2 + 1). 180 °C. Dales la vuelta a los 8 min.", n: "Blancos por dentro y 74 °C en el centro. Si los filetes tienen más de 2 cm, añade 3 min.", tm: [15, "Pavo y pollo"] },
+      { m: "a", x: "Tanda 5, cerdo y hamburguesa: los 2 filetes de lomo de cerdo con sal, pimentón y ajo en polvo y la hamburguesa de pavo juntos. 180 °C. Dales la vuelta a los 6 min.", n: "El lomo sin partes crudas (63 °C) y la hamburguesa sin rosa (74 °C). Si la hamburguesa queda cruda por el centro, 2 min más.", tm: [12, "Cerdo y hamburguesa"] },
+      { m: "a", x: "Tanda 6, pescado (siempre el último, para que el olor no pase al resto): el lomo de bacalao con unas gotas de aceite y sal. 180 °C, sin darle la vuelta.", n: "Se separa en lascas. Si se pega, usa papel de airfryer perforado.", tm: [10, "Bacalao"] },
+      S.airClean
+    ] },
+    { t: "3. Fuegos mientras tanto", r: { o: "durante el horno", a: "durante la airfryer" }, s: [
+      S.eggs,
+      { x: "Arroz: en un cazo, 10 cucharadas soperas de arroz con 3 vasos de agua y una pizca de sal. Cuando hierva, tapa y baja a fuego medio-bajo sin destapar. Apaga y deja reposar tapado 5 min. Suéltalo con un tenedor.", tm: [18, "Arroz"] },
+      S.pasta,
+      { x: "Puré: cubre las verduras del puré con agua y hiérvelas hasta que la zanahoria se parta con un tenedor. Escurre y guarda 1 vaso del agua. Tritura añadiendo el agua poco a poco hasta una textura espesa y 1 cucharada de postre de aceite. Salen 3-4 cacillos.", n: "Usarás 2 cacillos. Si sobra, congélalo.", tm: [20, "Puré"] },
+      { x: "Lentejas estofadas: en una olla, sofríe la cebolla, el pimiento y la zanahoria picados con 1 cucharada de postre de aceite a fuego medio durante 8 min, removiendo, hasta que la cebolla esté transparente. Añade 1 cucharadita de pimentón, remueve 20 segundos y echa ½ bote de lentejas con 1 vaso de agua. Cuece a fuego suave.", n: "Pon el temporizador al empezar la cocción. Deben quedar melosas, no secas. Añade sal al final.", tm: [10, "Lentejas"] },
+      { x: "Judías verdes con patata: hierve agua con sal y echa las judías troceadas y la patata en cubos. Cuece hasta que la patata esté tierna y escurre. Saltea 2 min en una sartén con 1 cucharada de postre de aceite, una pizca de ajo en polvo y otra de pimentón. Salen unos 2 cacillos.", n: "Las judías deben quedar tiernas pero con algo de mordida.", tm: [15, "Judías verdes"] },
+      { x: "Tomate de la pasta: sofríe la cebolla picada con 1 cucharada de postre de aceite durante 5 min. Añade 8 cucharadas soperas de tomate triturado, sal y orégano y cuece a fuego suave.", n: "Remueve de vez en cuando para que no se pegue. Alcanza para las dos raciones de pasta.", tm: [10, "Tomate"] }
+    ] },
+    { t: "4. Enfriar y guardar", r: { o: "1:50 – 2:30", a: "2:10 – 2:50" }, s: [
+      S.cool, S.tuppers,
+      { x: "Nevera (lunes a miércoles): pavo con patata y verduras, bacalao con arroz, lentejas con lomo de cerdo y verduras, boniato asado, judías verdes con patata y pollo, y pasta con tomate y atún." },
+      S.eggsFridge,
+      { x: "Congelador (jueves y viernes): lomo de cerdo con arroz y verduras, 2 cacillos de puré, pasta con tomate y hamburguesa de pavo, y pavo con arroz y verduras.", n: S.freezeNote },
+      { x: "La otra mitad del bote de lentejas, guárdala en un tupper en la nevera para otra comida (3 días)." },
+      S.salad
+    ] }
+  ]
+};
+
+const WEEKS = { A: WEEK_A, B: WEEK_B };
+
+const FRIDGE = [["Lentejas, judías verdes, verduras y puré", 4], ["Arroz, pasta, pollo, pavo y cerdo", 3], ["Pescado", 2]];
+
+/* ---------- Estado ---------- */
+let checks = {};
+let method = "o";
+let week = "A";
+try { checks = JSON.parse(localStorage.getItem("bc-checks") || "{}"); } catch (e) { checks = {}; }
+try { method = localStorage.getItem("bc-method") === "a" ? "a" : "o"; } catch (e) { method = "o"; }
+try { week = localStorage.getItem("bc-week") === "B" ? "B" : "A"; } catch (e) { week = "A"; }
+function save() { try { localStorage.setItem("bc-checks", JSON.stringify(checks)); } catch (e) {} }
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const pick = (v) => (v && typeof v === "object" ? v[method] : v);
+const W = () => WEEKS[week];
+
+/* ---------- Menú ---------- */
+function renderMenu() {
+  const dow = new Date().getDay();
+  const todayIdx = dow >= 1 && dow <= 5 ? dow - 1 : -1;
+  let html = "";
+  if (dow === 3) html += '<div class="banner">Esta noche pasa del congelador a la nevera los tuppers del jueves.</div>';
+  if (dow === 4) html += '<div class="banner">Esta noche pasa del congelador a la nevera los tuppers del viernes.</div>';
+  if (dow === 0 || dow === 6) html += '<div class="banner">Domingo de cocina: revisa la pestaña Compra y sigue los pasos en Domingo.</div>';
+  W().days.forEach((x, i) => {
+    html += `<article class="card ${i === todayIdx ? "today" : ""}">
+      <div class="day-head"><strong>${x.d}${i === todayIdx ? " · hoy" : ""}</strong><span class="pill ${x.fr ? "cold" : ""}">${x.fr ? "Congelado" : "Nevera"}</span></div>
+      <div class="meals">
+        <div><h3>Comida</h3><p class="sum">${esc(x.rc)}</p><ul>${x.c.map((l) => `<li>${esc(l)}</li>`).join("")}</ul></div>
+        <div><h3>Cena</h3><p class="sum">${esc(x.rn)}</p><ul>${x.n.map((l) => `<li>${esc(l)}</li>`).join("")}</ul></div>
+      </div>
+    </article>`;
+  });
+  html += '<p class="note">Jueves y viernes van al congelador y se descongelan en la nevera la noche anterior. La ensalada y los huevos se preparan el mismo día.</p>';
+  html += '<div class="card"><h2>Huevos al momento</h2><p class="note"><strong>Revuelto:</strong> bate los huevos con una pizca de sal. En una sartén antiadherente a fuego medio-bajo con unas gotas de aceite, vierte el huevo y remueve con una espátula 1-2 min, hasta que cuaje pero siga jugoso.</p><p class="note"><strong>Tortilla francesa:</strong> bate los huevos con sal. En una sartén a fuego medio con unas gotas de aceite, vierte el huevo y mueve la sartén 20 segundos. Dobla la tortilla por la mitad y déjala 30 segundos más.</p></div>';
+  $("menu").innerHTML = html;
+}
+
+/* ---------- Compra y Domingo ---------- */
+function checkRow(key, inner) {
+  return `<label class="check"><input type="checkbox" data-key="${key}" ${checks[key] ? "checked" : ""}><span>${inner}</span></label>`;
+}
+function renderCompra() {
+  let total = 0, done = 0, html = "";
+  W().shop.forEach((g, gi) => {
+    html += `<div class="card"><h3>${g[0]}</h3>`;
+    g[1].forEach((it, ii) => {
+      const k = `c${week}${gi}-${ii}`; total++; if (checks[k]) done++;
+      html += checkRow(k, `<span class="txt">${it[0] ? `<span class="qty">${esc(it[0])}</span> ` : ""}${esc(it[1])}</span>`);
+    });
+    html += "</div>";
+  });
+  $("compra").innerHTML = `<div class="card"><div class="toolbar"><span>${done} de ${total} comprados</span><button class="ghost" data-reset="c">Vaciar marcas</button></div><div class="progress"><i style="width:${total ? (done / total) * 100 : 0}%"></i></div></div>` + html;
+}
+function renderDomingo() {
+  let total = 0, done = 0, body = "";
+  W().phases.forEach((p, pi) => {
+    body += `<div class="card"><div class="phase-head"><h2>${pick(p.t)}</h2><span>${pick(p.r)}</span></div>`;
+    p.s.forEach((s, si) => {
+      if (s.m && s.m !== method) return;
+      const k = `d${week}${pi}-${si}`; total++; if (checks[k]) done++;
+      const tip = s.n ? `<span class="tip">${esc(s.n)}</span>` : "";
+      const tm = s.tm ? `<br><button class="timer" data-timer="${k}" data-min="${s.tm[0]}" data-label="${s.tm[1]}">⏱ ${s.tm[1]} · ${s.tm[0]} min</button>` : "";
+      body += checkRow(k, `<span class="txt">${esc(s.x)}</span>${tip}${tm}`);
+    });
+    body += "</div>";
+  });
+  const info = method === "o"
+    ? "Horno: unas 2 h 30 min en total, con las 4 bandejas a la vez. Si tu horno admite menos, sigue el orden del último paso de la fase 2."
+    : "Airfryer Cosori 5,5 L: unas 3 h en total, porque se cocina por tandas (6 tandas, cerca de 1 h 40 min de airfryer). Los fuegos de la fase 3 se hacen a la vez.";
+  $("domingo").innerHTML = `
+    <div class="card"><h3>Cómo cocinas hoy</h3>
+      <div class="seg" role="group" aria-label="Método de cocción">
+        <button data-method="o" aria-pressed="${method === "o"}">Horno</button>
+        <button data-method="a" aria-pressed="${method === "a"}">Airfryer Cosori 5,5 L</button>
+      </div>
+      <p class="note">${info}</p></div>
+    <div class="card"><div class="toolbar"><span>${done} de ${total} pasos hechos</span><button class="ghost" data-reset="d">Vaciar marcas</button></div><div class="progress"><i style="width:${total ? (done / total) * 100 : 0}%"></i></div></div>` + body;
+  refreshTimers();
+}
+function renderConservar() {
+  $("conservar").innerHTML = `
+    <div class="card"><h2>En la nevera</h2><div class="rows">
+      ${FRIDGE.map((f) => `<div class="row"><span>${f[0]}</span><span class="pill">${f[1]} días</span></div>`).join("")}
+    </div><p class="note">Patata y boniato asados aguantan 4 días. Los huevos se guardan crudos y se hacen al momento. El sobrante de legumbre de bote se guarda 3 días para otra comida.</p></div>
+    <div class="card"><h2>En el congelador</h2><div class="rows">
+      <div class="row"><span>Guisos, puré, carne y arroz</span><span class="pill cold">2-3 meses</span></div>
+    </div><p class="note">El pescado cocido no se congela, por eso va a los primeros días de la semana.</p></div>
+    <div class="card"><h2>Reglas del día</h2>
+      <div class="rows">
+        <div class="row"><span>Enfriar fuera del horno</span><span class="pill warn">20 min</span></div>
+        <div class="row"><span>Guardar en tuppers antes de</span><span class="pill warn">2 h</span></div>
+        <div class="row"><span>Descongelar</span><span class="pill cold">en nevera, la noche anterior</span></div>
+        <div class="row"><span>Recalentar</span><span class="pill">microondas con un chorrito de agua</span></div>
+      </div></div>`;
+}
+function updateWeekUI() {
+  document.querySelectorAll("[data-week]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.week === week)));
+  $("weekDesc").textContent = W().desc;
+}
+function renderAll() { renderMenu(); renderCompra(); renderDomingo(); renderConservar(); updateWeekUI(); }
+
+/* ---------- Temporizadores ---------- */
+const timers = {};
+let ctx = null;
+function beep() {
+  try {
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < 3; i++) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination); o.frequency.value = 880;
+      const t = ctx.currentTime + i * 0.35;
+      g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      o.start(t); o.stop(t + 0.25);
+    }
+  } catch (e) {}
+}
+function fmt(s) { return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 6000);
+}
+function refreshTimers() {
+  document.querySelectorAll(".timer").forEach((b) => {
+    const k = b.dataset.timer, t = timers[k], label = b.dataset.label;
+    if (!t) { b.className = "timer"; b.textContent = `⏱ ${label} · ${b.dataset.min} min`; return; }
+    if (t.done) { b.className = "timer done"; b.textContent = `✓ ${label} listo`; return; }
+    const left = Math.max(0, Math.round((t.end - Date.now()) / 1000));
+    b.className = "timer run"; b.textContent = `${label} · ${fmt(left)}`;
+  });
+}
+setInterval(() => {
+  Object.keys(timers).forEach((k) => {
+    const t = timers[k];
+    if (!t.done && Date.now() >= t.end) {
+      t.done = true; beep();
+      try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch (e) {}
+      toast(`${t.label}: tiempo cumplido`);
+    }
+  });
+  refreshTimers();
+}, 500);
+
+/* ---------- Eventos ---------- */
+document.addEventListener("click", (e) => {
+  const tm = e.target.closest(".timer");
+  if (tm) {
+    e.preventDefault();
+    const k = tm.dataset.timer;
+    if (timers[k]) delete timers[k];
+    else {
+      try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); ctx.resume && ctx.resume(); } catch (er) {}
+      timers[k] = { end: Date.now() + Number(tm.dataset.min) * 60000, label: tm.dataset.label, done: false };
+    }
+    refreshTimers(); return;
+  }
+  const wk = e.target.closest("[data-week]");
+  if (wk) {
+    week = wk.dataset.week;
+    try { localStorage.setItem("bc-week", week); } catch (er) {}
+    renderAll(); return;
+  }
+  const mt = e.target.closest("[data-method]");
+  if (mt) {
+    method = mt.dataset.method;
+    try { localStorage.setItem("bc-method", method); } catch (er) {}
+    renderDomingo(); return;
+  }
+  const rs = e.target.closest("[data-reset]");
+  if (rs) {
+    const p = rs.dataset.reset;
+    Object.keys(checks).forEach((k) => { if (k.charAt(0) === p && k.charAt(1) === week) delete checks[k]; });
+    save(); p === "c" ? renderCompra() : renderDomingo(); return;
+  }
+  const tab = e.target.closest("nav button");
+  if (tab) show(tab.dataset.tab);
+});
+document.addEventListener("change", (e) => {
+  const k = e.target.dataset && e.target.dataset.key;
+  if (!k) return;
+  checks[k] = e.target.checked; save();
+  const y = window.scrollY;
+  k.charAt(0) === "c" ? renderCompra() : renderDomingo();
+  window.scrollTo(0, y);
+});
+
+function show(name) {
+  ["menu", "compra", "domingo", "conservar"].forEach((n) => ($(n).hidden = n !== name));
+  document.querySelectorAll("nav button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  try { history.replaceState(null, "", "#" + name); } catch (e) {}
+  window.scrollTo(0, 0);
+}
+
+renderAll();
+const h = location.hash.slice(1);
+if (["menu", "compra", "domingo", "conservar"].includes(h)) show(h);
+window.addEventListener("hashchange", () => {
+  const n = location.hash.slice(1);
+  if (["menu", "compra", "domingo", "conservar"].includes(n)) show(n);
+});
+</script>
+
+</body></html>
