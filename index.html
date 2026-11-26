@@ -1,0 +1,171 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Comidas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#27794a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Comidas">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: cabecera con nombre y botón de tema, selector de apartados debajo y la app activa ocupando el resto */
+:root {
+  --bg: #f3f6f1;
+  --surface: #ffffff;
+  --fg: #17231c;
+  --muted: #5a6b61;
+  --line: #dbe4dd;
+  --accent: #27794a;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcefe3;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1410; --surface: #151f19; --fg: #e7efe9; --muted: #96aa9d; --line: #263429;
+    --accent: #62c88b; --accent-ink: #07170e; --accent-soft: #1a3326; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1410; --surface: #151f19; --fg: #e7efe9; --muted: #96aa9d; --line: #263429;
+  --accent: #62c88b; --accent-ink: #07170e; --accent-soft: #1a3326; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); }
+.app { height: 100%; display: flex; flex-direction: column; }
+
+.top {
+  flex: none; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 10px;
+}
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand h1 { font-family: var(--font-display); font-size: 1.45rem; line-height: 1; margin: 0; letter-spacing: -0.01em; }
+.mode {
+  font: inherit; font-size: .8rem; font-weight: 600; color: var(--fg); background: transparent;
+  border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 12px 7px 10px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.mode svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--bg); border-radius: 14px; padding: 4px; }
+.seg button {
+  font: inherit; font-size: .88rem; font-weight: 600; color: var(--muted); background: transparent; border: 0;
+  border-radius: 10px; padding: 10px 6px; cursor: pointer; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.seg button svg { width: 19px; height: 19px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.seg button[aria-selected="true"] { color: var(--accent-ink); background: var(--accent); }
+.mode:focus-visible, .seg button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.views { flex: 1; min-height: 0; position: relative; }
+.views iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--bg); }
+.views iframe[hidden] { display: none; }
+@media (max-width: 360px) { .seg button { font-size: .8rem; gap: 5px; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>Comidas</h1>
+      <button class="mode" id="mode" type="button" aria-label="Cambiar tema"><span id="mode-icon"></span><span id="mode-text">Auto</span></button>
+    </div>
+    <nav class="seg" role="tablist" aria-label="Apartados">
+      <button role="tab" id="t-batch-cooking" data-v="batch-cooking" aria-selected="true">
+        <svg viewBox="0 0 24 24"><path d="M6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M4 10h16M9 6c0-1.5 1-1.5 1-3M14 6c0-1.5 1-1.5 1-3"/></svg>Batch cooking
+      </button>
+      <button role="tab" id="t-lista-compra" data-v="lista-compra" aria-selected="false">
+        <svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>Lista de la compra
+      </button>
+    </nav>
+  </header>
+  <div class="views">
+    <iframe id="v-batch-cooking" src="batch-cooking.html" title="Batch Cooking Semanal"></iframe>
+    <iframe id="v-lista-compra" src="lista-compra.html" title="Lista de la compra" hidden></iframe>
+  </div>
+</div>
+
+<script>
+(function () {
+  var VIEWS = ["batch-cooking", "lista-compra"];
+  var MODES = ["auto", "light", "dark"];
+  var LABEL = { auto: "Auto", light: "Claro", dark: "Noche" };
+  var ICON = {
+    auto: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>',
+    light: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    dark: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>'
+  };
+  var KEY = "comidas-tema";
+
+  /* Estilo común que se añade a las dos apps para que compartan paleta y tipografía; el contenido no se toca */
+  var SHARED = ':root{--bg:#f3f6f1;--surface:#ffffff;--fg:#17231c;--muted:#5a6b61;--line:#dbe4dd;--accent:#27794a;--accent-ink:#ffffff;--accent-fg:#ffffff;--accent-soft:#dcefe3;--done-bg:#e9f2ec;--font-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--font-body:"Inter",system-ui,-apple-system,sans-serif}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1410;--surface:#151f19;--fg:#e7efe9;--muted:#96aa9d;--line:#263429;--accent:#62c88b;--accent-ink:#07170e;--accent-fg:#07170e;--accent-soft:#1a3326;--done-bg:#111a15;color-scheme:dark}}' +
+    ':root[data-theme="dark"]{--bg:#0d1410;--surface:#151f19;--fg:#e7efe9;--muted:#96aa9d;--line:#263429;--accent:#62c88b;--accent-ink:#07170e;--accent-fg:#07170e;--accent-soft:#1a3326;--done-bg:#111a15;color-scheme:dark}' +
+    ':root[data-theme="light"]{color-scheme:light}' +
+    'h1,h2{font-family:var(--font-display)}';
+  var FONTS = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap";
+
+  var mode = "auto";
+  try { var s = localStorage.getItem(KEY); if (MODES.indexOf(s) >= 0) mode = s; } catch (e) {}
+
+  function isDark() {
+    return mode === "dark" || (mode === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+  function setTheme(doc) {
+    var root = doc.documentElement;
+    if (mode === "auto") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", mode);
+  }
+  function skin(frame) {
+    var doc;
+    try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || !doc.head) return;
+    if (!doc.getElementById("comidas-shared")) {
+      var l = doc.createElement("link"); l.rel = "stylesheet"; l.href = FONTS; doc.head.appendChild(l);
+      var st = doc.createElement("style"); st.id = "comidas-shared"; st.textContent = SHARED; doc.head.appendChild(st);
+    }
+    setTheme(doc);
+  }
+  function applyAll() {
+    setTheme(document);
+    document.getElementById("mode-icon").innerHTML = ICON[mode];
+    document.getElementById("mode-text").textContent = LABEL[mode];
+    document.getElementById("mode").setAttribute("aria-label", "Tema: " + LABEL[mode] + ". Pulsa para cambiar");
+    VIEWS.forEach(function (n) { skin(document.getElementById("v-" + n)); });
+    try { if (window.AndroidTheme) window.AndroidTheme.setDark(isDark()); } catch (e) {}
+  }
+
+  VIEWS.forEach(function (n) {
+    var f = document.getElementById("v-" + n);
+    f.addEventListener("load", function () { skin(f); });
+  });
+  document.getElementById("mode").addEventListener("click", function () {
+    mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+    try { localStorage.setItem(KEY, mode); } catch (e) {}
+    applyAll();
+  });
+  if (window.matchMedia) {
+    var mq = matchMedia("(prefers-color-scheme: dark)");
+    var onChange = function () { if (mode === "auto") applyAll(); };
+    if (mq.addEventListener) mq.addEventListener("change", onChange); else if (mq.addListener) mq.addListener(onChange);
+  }
+
+  function show(v) {
+    if (VIEWS.indexOf(v) < 0) v = VIEWS[0];
+    VIEWS.forEach(function (n) {
+      document.getElementById("v-" + n).hidden = n !== v;
+      document.getElementById("t-" + n).setAttribute("aria-selected", n === v ? "true" : "false");
+    });
+  }
+  document.querySelectorAll(".seg button").forEach(function (b) {
+    b.addEventListener("click", function () { location.hash = b.dataset.v; });
+  });
+  window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
+  show(location.hash.slice(1));
+  applyAll();
+})();
+</script>
+
+<script>if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }); }</script>
+</body></html>
